@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { User } from '../../types/User';
+import User from '../../types/User';
 
 import Card from '../UI/Card';
 import classes from './UsersList.module.css';
