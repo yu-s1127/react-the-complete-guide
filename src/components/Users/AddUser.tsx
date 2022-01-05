@@ -1,30 +1,36 @@
-import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
+import React, { ChangeEvent, FC, FormEvent, useState, useRef } from 'react';
 
 import Card from '../UI/Card';
 import Button from '../UI/Button';
 import ErrorModal from '../UI/ErrorModal';
 import classes from './AddUser.module.css';
 import Error from '../../types/Error';
+import Wrapper from '../Helpers/Wrapper';
 
 interface Props {
   onAddUser: (uName: string, uAge: string) => void;
 }
 
 const AddUser: FC<Props> = (props) => {
-  const [enteredUsername, setEnteredUsername] = useState<string>('');
-  const [enteredAge, setEnteredAge] = useState<string>('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const ageInputRef = useRef<HTMLInputElement>(null);
+
   const [error, setError] = useState<Error | null>(null);
 
   const addUserhandler = (event: FormEvent) => {
     event.preventDefault();
-    if (enteredUsername.trim().length === 0 || enteredAge.trim().length === 0) {
+
+    const enteredName = nameInputRef.current?.value;
+    const enteredAge = ageInputRef.current?.value;
+
+    if (enteredName?.trim().length === 0 || enteredAge?.trim().length === 0) {
       setError({
         title: 'invalid input',
         message: 'Please enter a valid name and age (non-empty values).',
       });
       return;
     }
-    if (parseInt(enteredAge) < 1) {
+    if (enteredAge && parseInt(enteredAge) < 1) {
       setError({
         title: 'invalid input',
         message: 'Please enter a valid age (> 0).',
@@ -32,17 +38,10 @@ const AddUser: FC<Props> = (props) => {
       return;
     }
 
-    props.onAddUser(enteredUsername, enteredAge);
-    setEnteredUsername('');
-    setEnteredAge('');
-  };
+    props.onAddUser(enteredName!, enteredAge!);
 
-  const usernameChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setEnteredUsername(event.target.value);
-  };
-
-  const ageChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setEnteredAge(event.target.value);
+    if (nameInputRef.current !== null) nameInputRef.current.value = '';
+    if (ageInputRef.current !== null) ageInputRef.current.value = '';
   };
 
   const errorHandler = () => {
@@ -50,7 +49,7 @@ const AddUser: FC<Props> = (props) => {
   };
 
   return (
-    <>
+    <Wrapper>
       {error && (
         <ErrorModal
           title={error.title}
@@ -61,23 +60,13 @@ const AddUser: FC<Props> = (props) => {
       <Card className={classes.input}>
         <form onSubmit={addUserhandler}>
           <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={enteredUsername}
-            onChange={usernameChangeHandler}
-          />
+          <input id="username" type="text" ref={nameInputRef} />
           <label htmlFor="username">Age (Years)</label>
-          <input
-            id="username"
-            type="number"
-            value={enteredAge}
-            onChange={ageChangeHandler}
-          />
+          <input id="username" type="number" ref={ageInputRef} />
           <Button type="submit">Add User</Button>
         </form>
       </Card>
-    </>
+    </Wrapper>
   );
 };
 
